@@ -13,22 +13,26 @@ let
   lib = { inherit runCommand; };
 
   nodejs = import ./pkgs/nodejs.nix { inherit lib; };
+  cmake = import ./pkgs/cmake.nix { inherit lib; };
 
   vanillaPathBits = [
     inenv
     nodejs
+    cmake
   ];
 
   inenv = runCommand "inenv" { }
     ''
       export PATH=/usr/sbin:/usr/bin:/bin
-      mkdir -p $out
-      cat > $out/inenv <<EOF
+      mkdir -p $out/bin
+      cat > $out/bin/inenv <<EOF
       "\$@"
       EOF
 
-      chmod +x $out/inenv
+      chmod +x $out/bin/inenv
     '';
+
+  profile_sb = import ./profile.sb.nix;
 
   vanillaPath = builtins.concatStringsSep ":" vanillaPathBits;
 
@@ -46,17 +50,17 @@ let
         exe=$(basename "$exe")
         echo found exe "$exe"
 
+
         cat > $out/bin/$exe <<EOF
           #!/usr/bin/env bash
           set -euo pipefail
-          export PATH=${vanillaPath}/bin:$PATH
           export HOME=/nowhere
 
           if [ "\''${SHELL_NO_SANDBOX:-}" == "1" ]
           then
-            $exe "\$@"
+            $bit/bin/$exe "\$@"
           else
-            /usr/bin/sandbox-exec -f ${./profile.sb} $exe "\$@"
+            /usr/bin/sandbox-exec -f ${builtins.toFile "profile.sb" profile_sb} $bit/bin/$exe "\$@"
           fi
     EOF
         chmod +x "$out/bin/$exe"

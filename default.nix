@@ -106,8 +106,16 @@ let
             #!/usr/bin/env bash
             set -euo pipefail
             export HOME=/nowhere
-
-            ${if sandboxed then "/usr/bin/sandbox-exec -f ${profile_sb} " else "" } $package/bin/$exe "\$@"
+            ${if sandboxed then
+            ''
+            # we need to re-export the path, otherwise $exe will pick up other
+            # wrapped executables, trying to execute a nested sandbox.
+            PATH=${builtins.concatStringsSep ":" (builtins.map (e: "${e}/bin") packages)}:$PATH \
+              /usr/bin/sandbox-exec -f ${profile_sb}  $package/bin/$exe "\$@"
+            '' else ''
+            $package/bin/$exe "\$@"
+            ''
+          }
       EOF
           chmod +x "$out/bin/$exe"
 

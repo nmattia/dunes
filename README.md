@@ -11,6 +11,5 @@ res=$(nix-build --no-link \
   -E '(import (builtins.fetchTarball https://github.com/nmattia/dunes/tarball/main))' \
   -A load
 )
-watch_file ./default.nix
 . "$res"
 ```

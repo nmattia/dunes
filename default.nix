@@ -1,3 +1,4 @@
+{ dunesToml ? "${builtins.getEnv "PWD"}/dunes.toml" }:
 let
   lib = import ./lib.nix;
 
@@ -24,6 +25,8 @@ let
       cargo = import ./pkgs/cargo.nix { inherit lib; };
     };
 
+  dunes = builtins.fromTOML (builtins.readFile dunesToml);
+
   # list of packages that must have a 'bin' dir and executables inside
   pkgs =
     let
@@ -33,7 +36,7 @@ let
           attrNamesAttrs = builtins.listToAttrs (map (e: { name = e; value = null; }) attrNames);
         in
         builtins.intersectAttrs attrNamesAttrs;
-      packagesList = split "," (builtins.getEnv "DUNES_PACKAGES");
+      packagesList = dunes.packages;
     in
     [
       dunes-run
@@ -106,7 +109,7 @@ let
           cat > $out/bin/$exe <<EOF
             #!/usr/bin/env bash
             set -euo pipefail
-            export HOME=/nowhere
+            export HOME=${builtins.getEnv "PWD" + "/" + dunes.home }
             ${if sandboxed then
             ''
             # we need to re-export the path, otherwise $exe will pick up other

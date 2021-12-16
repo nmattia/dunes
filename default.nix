@@ -1,16 +1,27 @@
 let
   lib = import ./lib.nix;
 
-  nodejs = import ./pkgs/nodejs.nix { inherit lib; };
-  cmake = import ./pkgs/cmake.nix { inherit lib; };
+  allPackages = {
+    nodejs = import ./pkgs/nodejs.nix { inherit lib; };
+    cmake = import ./pkgs/cmake.nix { inherit lib; };
+  };
 
   # list of packages that must have a 'bin' dir and executables inside
-  pkgs = [
-    dunes-run
-    nodejs
-    cmake
-    dunes-print-sandbox-profile
-  ];
+  pkgs =
+    let
+      filterAttrs = attrNames:
+        let
+          attrNamesAttrs = builtins.listToAttrs (map (e: { name = e; value = null; }) attrNames);
+
+        in
+        builtins.intersectAttrs attrNamesAttrs;
+      packagesList = builtins.split "," (builtins.getEnv "DUNES_PACKAGES");
+    in
+    assert (builtins.trace packagesList) true;
+    [
+      dunes-run
+      dunes-print-sandbox-profile
+    ] ++ builtins.attrValues (filterAttrs packagesList allPackages);
 
   freePackages = [ dunes-free ];
 
@@ -80,12 +91,7 @@ let
             set -euo pipefail
             export HOME=/nowhere
 
-            if [ "\''${SHELL_NO_SANDBOX:-}" == "1" ]
-            then
-              $package/bin/$exe "\$@"
-            else
-              ${if sandboxed then "/usr/bin/sandbox-exec -f ${profile_sb} " else "" } $package/bin/$exe "\$@"
-            fi
+            ${if sandboxed then "/usr/bin/sandbox-exec -f ${profile_sb} " else "" } $package/bin/$exe "\$@"
       EOF
           chmod +x "$out/bin/$exe"
 

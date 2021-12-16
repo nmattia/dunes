@@ -8,7 +8,7 @@ export DUNES_PACKAGES="nodejs,cmake"
 export DUNES_EXTRA_PACKAGES="foo=bar.nix,baz=quux.nix"
 
 res=$(nix-build --no-link \
-  -E '(import (builtins.fetchTarball https://github.com/nmattia/dunes/tarball/master))' \
+  -E '(import (builtins.fetchTarball https://github.com/nmattia/dunes/tarball/main))' \
   -A load
 )
 watch_file ./default.nix

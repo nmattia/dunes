@@ -1,23 +1,39 @@
 let
   lib = import ./lib.nix;
 
-  allPackages = {
-    nodejs = import ./pkgs/nodejs.nix { inherit lib; };
-    cmake = import ./pkgs/cmake.nix { inherit lib; };
-  };
+  split = b: str: builtins.filter (e: builtins.typeOf e != "list") (builtins.split b str);
+
+  allPackages =
+    let
+      extraPackagesPairs = (builtins.filter (e: e != "") (split "[,]" (builtins.getEnv "DUNES_EXTRA_PACKAGES")));
+      splitPair = str:
+        let pairRaw = split "[=]" str;
+        in
+        if builtins.length pairRaw == 2
+        then
+          { name = builtins.elemAt pairRaw 0; value = import (builtins.elemAt pairRaw 1) { inherit lib; }; }
+        else
+          throw "Format: <name>=<file.nix>, got ${str}";
+      extraPackages =
+        builtins.listToAttrs (builtins.map splitPair extraPackagesPairs);
+    in
+    extraPackages //
+    {
+      nodejs = import ./pkgs/nodejs.nix { inherit lib; };
+      cmake = import ./pkgs/cmake.nix { inherit lib; };
+    };
 
   # list of packages that must have a 'bin' dir and executables inside
   pkgs =
     let
       filterAttrs = attrNames:
+        assert (builtins.all (e: builtins.typeOf e == "string") attrNames);
         let
           attrNamesAttrs = builtins.listToAttrs (map (e: { name = e; value = null; }) attrNames);
-
         in
         builtins.intersectAttrs attrNamesAttrs;
-      packagesList = builtins.split "," (builtins.getEnv "DUNES_PACKAGES");
+      packagesList = split "," (builtins.getEnv "DUNES_PACKAGES");
     in
-    assert (builtins.trace packagesList) true;
     [
       dunes-run
       dunes-print-sandbox-profile
@@ -77,6 +93,7 @@ let
       mkdir -p $out/bin
 
       for package in $packages; do
+
         echo looking for executables in "$package"
 
         shopt -s nullglob
@@ -84,7 +101,6 @@ let
         for exe in "$package"/bin/*; do
           exe=$(basename "$exe")
           echo found exe "$exe"
-
 
           cat > $out/bin/$exe <<EOF
             #!/usr/bin/env bash

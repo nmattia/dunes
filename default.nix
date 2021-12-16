@@ -21,6 +21,7 @@ let
     {
       nodejs = import ./pkgs/nodejs.nix { inherit lib; };
       cmake = import ./pkgs/cmake.nix { inherit lib; };
+      cargo = import ./pkgs/cargo.nix { inherit lib; };
     };
 
   # list of packages that must have a 'bin' dir and executables inside

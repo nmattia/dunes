@@ -6,7 +6,7 @@
   (allow file-read-metadata (subpath "/Users/nicolas"))
   ${
     let
-      root = builtins.getEnv "COMFY_ROOT";
+      root = builtins.getEnv "DUNES_ROOT";
     in
     if root != ""
     then "(allow file* (subpath \"${root}\"))"

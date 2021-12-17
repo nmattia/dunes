@@ -1,4 +1,4 @@
-packages = [ "nodejs", "llvm" ]
+packages = [ "nodejs", "openssl", "cargo", "llvm", "cmake" ]
 home = ".home"
 
 [env]

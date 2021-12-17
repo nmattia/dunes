@@ -22,6 +22,7 @@ let
     {
       nodejs = import ./pkgs/nodejs.nix { inherit lib; };
       cmake = import ./pkgs/cmake.nix { inherit lib; };
+      openssl = import ./pkgs/openssl.nix { inherit lib; };
       cargo = import ./pkgs/cargo.nix { inherit lib; };
       llvm = import ./pkgs/llvm.nix { inherit lib; };
     };

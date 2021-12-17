@@ -9,6 +9,8 @@ res=$(nix-build --no-link \
   -E '(import (builtins.fetchTarball https://github.com/nmattia/dunes/tarball/main))' \
   -A load
 )
+
+watch_file dunes.toml
 . "$res"
 ```
 
@@ -24,4 +26,8 @@ FOO="bar"
 ```
 
 
-Recommandation: install a working C toolchain through x code
+Recommendation: install a working C toolchain through x code
+
+```
+extra-sandbox-paths = /usr/lib /usr/sbin /usr/bin /bin /System /Library
+```

@@ -1,2 +1,6 @@
-packages = [ "nodejs" ]
+packages = [ "nodejs", "llvm" ]
 home = ".home"
+
+[env]
+# NOTE: this is loaded in the shell, not only in the dunes environment
+FOO = "bar!"

@@ -23,6 +23,7 @@ let
       nodejs = import ./pkgs/nodejs.nix { inherit lib; };
       cmake = import ./pkgs/cmake.nix { inherit lib; };
       cargo = import ./pkgs/cargo.nix { inherit lib; };
+      llvm = import ./pkgs/llvm.nix { inherit lib; };
     };
 
   dunes = builtins.fromTOML (builtins.readFile dunesToml);
@@ -132,6 +133,9 @@ let
     export PATH=/usr/bin:/bin
 
     cat > $out <<EOF
+    # First export all the environment variables
+    ${builtins.concatStringsSep "\n" (builtins.attrValues (builtins.mapAttrs (k: v: "export ${k}='${v}'") (dunes.env or {})))}
+    # Then create the PATH
     export PATH=${wrapPackages { packages = sandboxedPackages; name = "sandboxed"; sandboxed = true; }}/bin:${wrapPackages { packages = freePackages; name = "free"; sandboxed = false; }}/bin:\$PATH
     EOF
   '';

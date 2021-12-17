@@ -18,4 +18,10 @@ res=$(nix-build --no-link \
 ```bash
 packages = [ "nodejs" ]
 home = ".home"
+
+[env]
+FOO="bar"
 ```
+
+
+Recommandation: install a working C toolchain through x code

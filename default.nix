@@ -25,6 +25,7 @@ let
       openssl = import ./pkgs/openssl.nix { inherit lib; };
       cargo = import ./pkgs/cargo.nix { inherit lib; };
       llvm = import ./pkgs/llvm.nix { inherit lib; };
+      pkg-config = import ./pkgs/pkg-config.nix { inherit lib; };
     };
 
   dunes = builtins.fromTOML (builtins.readFile dunesToml);
